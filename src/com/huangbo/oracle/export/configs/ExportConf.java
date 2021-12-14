@@ -10,6 +10,7 @@ import com.huangbo.oracle.export.utils.StringUtil;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,19 +44,17 @@ public class ExportConf {
         Gson gson = new Gson();
         String jsonFile = "export.json";
         try {
-            Export json = gson.fromJson(new InputStreamReader(new FileInputStream(jsonFile), Constant.ENCODE_UTF8), Export.class);
+            Export json = gson.fromJson(new InputStreamReader(new FileInputStream(jsonFile), Charset.forName(Constant.ENCODE_UTF8)), Export.class);
             bufferSize = json.getBufferSize();
             dataDir = json.getDataDir();
             tableHead = json.getTableHead();
             splitter = json.getSplitter();
             suffix = json.getSuffix();
             tableInfo = json.getTableInfo();
-            if(!checkConf()){
+            if (!checkConf()) {
                 // 配置信息不正确, 退出程序
                 System.exit(-1);
             }
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("指定编码格式有误", e);
         } catch (FileNotFoundException e) {
             LOG.error("找不到配置文件 " + jsonFile, e);
         }
@@ -83,6 +82,16 @@ public class ExportConf {
         // 未配置表头
         if (null == tableHead) {
             tableHead = false;
+        }
+
+        // 未配置分隔符
+        if (null == splitter) {
+            splitter = ","; // 使用 "," 做默认分隔符
+        }
+
+        // 未配置文件后缀名
+        if (null == suffix) {
+            suffix = ".txt"; // 使用 ".txt" 用作默认后缀名
         }
 
         Set<String> users = tableInfo.keySet();
@@ -117,24 +126,16 @@ public class ExportConf {
                     }
                     // 检查分隔符
                     if (StringUtil.isEmpty(splitter)) {
-                        if (StringUtil.isNotEmpty(ExportConf.splitter)) {
-                            // 配置为全局分隔符
-                            table.setSplitter(ExportConf.splitter);
-                        } else {
-                            // 全局和局部都未配置, 使用默认分隔符 ","
-                            String defaultSplitter = ",";
-                            ExportConf.splitter = defaultSplitter;
-                            table.setSplitter(defaultSplitter);
-                        }
+                        // 配置为全局分隔符
+                        table.setSplitter(ExportConf.splitter);
                     }
                     // 检查文件名
                     if (StringUtil.isEmpty(fileName)) {
                         if (StringUtil.isEmpty(suffix)) {
-                            // 使用默认后缀 .txt
-                            String defaultSuffix = ".txt";
-                            ExportConf.suffix = defaultSuffix;
-                            table.setFileName(table.getTableName() + defaultSuffix);
+                            // 使用全局后缀
+                            table.setFileName(table.getTableName() + ExportConf.suffix);
                         } else {
+                            // 若配置了局部后缀，使用局部后缀
                             table.setFileName(table.getTableName() + suffix);
                         }
                     }
