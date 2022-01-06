@@ -156,6 +156,7 @@ public class OracleService {
         Statement stmt = null;
         ResultSet result = null;
         try {
+            stmt = conn.createStatement();
             result = stmt.executeQuery(sql);
             if (result.next()) {
                 return result.getString(1);

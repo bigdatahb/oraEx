@@ -25,7 +25,7 @@ public class DbUtil {
 
     private static Connection oracleConn = null;
 
-    private static String oracleUrl = "jdbc:oracle:thin:@//" + DbConf.oracleServer + ":" + DbConf.oraclePort + "/" + DbConf.oracleDatabase;
+    private static String oracleUrl = "jdbc:oracle:thin:@" + DbConf.oracleServer + ":" + DbConf.oraclePort + "/" + DbConf.oracleDatabase;
 
     private DbUtil() {
 
