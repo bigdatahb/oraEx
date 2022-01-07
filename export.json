@@ -1,26 +1,26 @@
 {
   "bufferSize": 10000,
   "dataDir": "d:\\data",
-  "tableHead": false,
-  "splitter": "$hb$",
-  "suffix": ".txt",
+  "tableHead": true,
+  "splitter": ",",
+  "suffix": ".csv",
   "tableInfo": {
     // 用户名
-    "LISIMENG": [
-      // 表信息指定参数是任选的，可以全部指定也可以仅指定部分
-      {
-        // 要导出的表名
-        "tableName": "quzhou_inpatient_2018",
-        // 导出文件字段分隔符
-        "splitter": ",",
-        // 导出文件名
-        "fileName": "quzhou_2018.csv"
-      },
-      {
-        "tableName": "QZ_HS_DEDUP",
-        "fileName": "LISIMENG_QZ_HS_DEDUP.csv"
-      }
-    ],
+//    "LISIMENG": [
+//      // 表信息指定参数是任选的，可以全部指定也可以仅指定部分
+//      {
+//        // 要导出的表名
+//        "tableName": "quzhou_inpatient_2018",
+//        // 导出文件字段分隔符
+//        "splitter": ",",
+//        // 导出文件名
+//        "fileName": "quzhou_2018.csv"
+//      },
+//      {
+//        "tableName": "QZ_HS_DEDUP",
+//        "fileName": "LISIMENG_QZ_HS_DEDUP.csv"
+//      }
+//    ],
     // 只配置用户名，表信息列表为空  表示导出该用户下的所有表
     "HUANGBO": []
   }
