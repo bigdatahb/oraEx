@@ -185,11 +185,12 @@ public class OracleService {
                 "\tA.DATA_TYPE,\n" +
                 "\tA.DATA_PRECISION,\n" +
                 "\tA.DATA_SCALE,\n" +
+                "\tA.DATA_LENGTH,\n" +
                 "\tA.NULLABLE,\n" +
                 "\tA.COLUMN_ID,\n" +
                 "\tB.COMMENTS\n" +
                 "FROM (\n" +
-                "\tSELECT COLUMN_NAME, DATA_TYPE, DATA_PRECISION, DATA_SCALE, NULLABLE, COLUMN_ID FROM ALL_TAB_COLS WHERE OWNER='" + user + "' AND TABLE_NAME='" + table + "' AND COLUMN_ID IS NOT NULL\n" +
+                "\tSELECT COLUMN_NAME, DATA_TYPE, DATA_PRECISION, DATA_SCALE, DATA_LENGTH, NULLABLE, COLUMN_ID FROM ALL_TAB_COLS WHERE OWNER='" + user + "' AND TABLE_NAME='" + table + "' AND COLUMN_ID IS NOT NULL\n" +
                 ") A \n" +
                 "LEFT JOIN \n" +
                 "\t(SELECT COLUMN_NAME, COMMENTS FROM ALL_COL_COMMENTS WHERE OWNER='" + user + "' AND TABLE_NAME='" + table + "') B\n" +
@@ -208,12 +209,27 @@ public class OracleService {
                 String dataType = result.getString(2);
                 int dataPrecision = result.getInt(3);
                 int dataScale = result.getInt(4);
-                boolean nullable = "Y".equals(result.getString(5));
-                int position = result.getInt(6);
-                String comment = result.getString(7);
+                int dataLength = result.getInt(5);
+                boolean nullable = "Y".equals(result.getString(6));
+                int position = result.getInt(7);
+                String comment = result.getString(8);
 
                 // 数据类型转换
                 String type = dataTypeTransferToOdps(dataType, dataPrecision, dataScale);
+//                String type = dataType;
+//
+//                    if (isCharType(dataType) || isVarcharType(dataType)
+//                            || isClobType(dataType) || isBlobType(dataType)) {
+//                        type = dataType + "(" + dataLength + ")";
+//                    } else if (Constant.DATA_TYPE_NUMBER.equalsIgnoreCase(dataType)) {
+//                        if(dataPrecision > 0) {
+//                            type = dataType + "(" + dataPrecision;
+//                            if (dataScale > 0) {
+//                                type += ", " + dataScale;
+//                            }
+//                            type += ")";
+//                        }
+//                    }
 
                 Column column = new Column(name, type);
                 column.setComment(comment);
@@ -428,6 +444,34 @@ public class OracleService {
                     .append(Constant.LINE_SEPARATOR);
         }
         sb.append(";").append(Constant.LINE_SEPARATOR);
+        return sb.toString();
+    }
+
+    public String getDdl(String user, String table) {
+        List<Column> columnList = getColumnInfo(user, table);
+        if (CollectionUtil.isEmpty(columnList)) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table ").append(table).append("(")
+                .append(System.lineSeparator());
+        for (Column col : columnList) {
+            String name = col.getName();
+            String type = col.getType();
+            String comment = col.getComment();
+            boolean nullable = col.getNullable();
+            sb.append("\t").append(name)
+                    .append(" ")
+                    .append(type);
+            if (StringUtil.isNotEmpty(comment)) {
+                sb.append(" comment '")
+                        .append(comment).append("'");
+            }
+            sb.append(",").append(System.lineSeparator());
+        }
+        // 去掉最后一个逗号
+        sb.deleteCharAt(sb.lastIndexOf(","));
+        sb.append(");").append(System.lineSeparator());
         return sb.toString();
     }
 
